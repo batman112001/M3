@@ -1,50 +1,9 @@
-body {
-  margin: 0;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: #ffffff;
-}
-
-h1 {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-input {
-  display: block;
-  margin: 10px auto;
-  padding: 10px;
-  width: 300px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-button {
-  padding: 10px 20px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #0056b3;
-}
-
-.download-button {
-  display: inline-block;
-  margin-top: 50px;
-  padding: 16px 32px;
-  background-color: #007bff;
-  color: #ffffff;
-  font-size: 18px;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-}
-
-.download-button:hover {
-  background-color: #0056b3;
-}
+body { margin:0; font-family: Arial, sans-serif; background:#ffffff; color:#111; }
+.center { min-height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:24px; }
+.card { width:100%; max-width:420px; background:#fff; border-radius:12px; padding:20px; box-shadow:0 8px 24px rgba(0,0,0,0.08); }
+input { width:100%; padding:12px; margin:6px 0; border:1px solid #ccc; border-radius:8px; }
+button { width:100%; padding:12px; margin:6px 0; border:none; border-radius:8px; background:#007bff; color:#fff; font-weight:600; cursor:pointer; }
+button:hover { background:#0056b3; }
+.download-button { display:inline-block; padding:16px 28px; background:#007bff; color:#fff; text-decoration:none; border-radius:10px; font-size:18px; }
+.download-button:hover { background:#0056b3; }
+pre { text-align:left; background:#f6f8fa; padding:12px; border-radius:8px; overflow:auto; max-height:40vh; }
