@@ -3,36 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Download Files</title>
+<title>Downloads</title>
 <style>
-  body { font-family: Arial; padding: 2rem; }
-  a.download-button { display:block; margin: 1rem 0; padding:1rem; background:#007bff; color:white; text-decoration:none; border-radius:5px; }
+  body { font-family: Arial; text-align:center; padding:50px; }
+  .download-button {
+    display:block; margin:20px auto; padding:12px 24px;
+    background:#007bff; color:#fff; text-decoration:none; border-radius:6px;
+    width:200px;
+  }
+  .download-button:hover { background:#0056b3; }
 </style>
 </head>
 <body>
-<h2>Download Files</h2>
+<h1>Available Downloads</h1>
 <div id="downloads"></div>
 
 <script>
-const FILES_JSON_URL = "https://raw.githubusercontent.com/batman112001/M3/main/files.json";
-
-async function loadDownloads() {
-  const res = await fetch(FILES_JSON_URL);
-  const files = await res.json();
-  const container = document.getElementById("downloads");
-  container.innerHTML = "";
-
-  for(const key in files){
-    const a = document.createElement("a");
-    a.href = files[key];
-    a.textContent = `Download ${key}`;
-    a.className = "download-button";
-    a.target = "_blank";
-    container.appendChild(a);
-  }
+async function loadFiles() {
+    try {
+        const res = await fetch('files.json');
+        const files = await res.json();
+        const container = document.getElementById('downloads');
+        container.innerHTML = '';
+        for (let key in files) {
+            const a = document.createElement('a');
+            a.href = files[key];
+            a.target = "_blank";
+            a.className = "download-button";
+            a.textContent = `Download ${key}`;
+            container.appendChild(a);
+        }
+    } catch (e) {
+        document.getElementById('downloads').textContent = 'Error fetching files.json';
+        console.error(e);
+    }
 }
-
-loadDownloads();
+loadFiles();
 </script>
 </body>
 </html>
