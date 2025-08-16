@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload & Download</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <!-- Upload section -->
+  <div id="upload-section">
+    <div id="upload-container">
+      <input type="text" id="file-url" placeholder="Paste your link here">
+      <button id="uploadBtn">Upload</button>
+    </div>
+  </div>
+
+  <!-- Download section -->
+  <div id="download-section" class="hidden">
+    <a id="downloadBtn" class="download-button">Download Now</a>
+  </div>
+
+  <script>
+    const uploadBtn = document.getElementById("uploadBtn");
+    const fileUrlInput = document.getElementById("file-url");
+    const uploadSection = document.getElementById("upload-section");
+    const downloadSection = document.getElementById("download-section");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    uploadBtn.addEventListener("click", () => {
+      const url = fileUrlInput.value.trim();
+      if (!url) {
+        alert("Please paste a link first!");
+        return;
+      }
+
+      try {
+        new URL(url); // validate
+        localStorage.setItem("downloadLink", url);
+
+        // switch to download page
+        uploadSection.classList.add("hidden");
+        downloadSection.classList.remove("hidden");
+
+        // configure download button
+        downloadBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        });
+      } catch {
+        alert("Invalid URL. Please enter a valid link.");
+      }
+    });
+  </script>
+</body>
+</html>
