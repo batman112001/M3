@@ -1,48 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Upload</title>
-<style>
-  body { font-family: Arial; text-align:center; padding:50px; }
-  input { padding:10px; width:300px; margin:10px; }
-  button { padding:10px 20px; margin:10px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Upload</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-<h1>Admin Upload</h1>
-<input type="text" id="file-name" placeholder="File name (M1, M2, etc)">
-<br>
-<input type="text" id="file-url" placeholder="Direct download link">
-<br>
-<button id="uploadBtn">Upload</button>
-<p id="message"></p>
+<body class="center">
+  <div class="card">
+    <h2>Admin: Add/Update File</h2>
+    <input id="secret" type="password" placeholder="Admin Secret" autocomplete="current-password" />
+    <input id="file-id" type="text" placeholder="File ID (e.g., M123)" />
+    <input id="file-url" type="text" placeholder="Direct Download URL" />
+    <button id="save">Save</button>
+    <p id="msg"></p>
+    <hr/>
+    <button id="list">Preview All IDs</button>
+    <pre id="out"></pre>
+  </div>
 
-<script>
-const uploadBtn = document.getElementById('uploadBtn');
-uploadBtn.addEventListener('click', async () => {
-    const name = document.getElementById('file-name').value.trim();
-    const url = document.getElementById('file-url').value.trim();
-    const msg = document.getElementById('message');
+  <script>
+    const $ = (id) => document.getElementById(id);
 
-    if(!name || !url) { msg.textContent = "Enter both name & URL"; return; }
+    $("save").addEventListener("click", async () => {
+      const secret = $("secret").value.trim();
+      const id = $("file-id").value.trim();
+      const url = $("file-url").value.trim();
+      const msg = $("msg");
 
-    try {
-        // Load current files
-        const res = await fetch('files.json');
-        const files = await res.json();
-        files[name] = url;
+      if (!secret || !id || !url) {
+        msg.textContent = "Enter secret, id, and url.";
+        msg.style.color = "red";
+        return;
+      }
 
-        // Update files.json (GitHub API or Netlify server needed for write)
-        msg.textContent = `File "${name}" added! Upload the updated files.json manually to GitHub/Netlify.`;
+      try {
+        new URL(url);
+      } catch {
+        msg.textContent = "Invalid URL.";
+        msg.style.color = "red";
+        return;
+      }
 
-        console.log("Updated files.json:", files);
-    } catch (e) {
-        msg.textContent = "Error reading files.json";
+      msg.textContent = "Saving...";
+      msg.style.color = "#333";
+
+      try {
+        const res = await fetch("/api/files", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Admin-Secret": secret
+          },
+          body: JSON.stringify({ id, url })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          msg.textContent = `Saved "${id}". Share link: ${location.origin}/downloads.html?id=${encodeURIComponent(id)}`;
+          msg.style.color = "green";
+        } else {
+          msg.textContent = data.error || JSON.stringify(data);
+          msg.style.color = "red";
+        }
+      } catch (e) {
+        msg.textContent = "Request failed. Open console for details.";
+        msg.style.color = "red";
         console.error(e);
-    }
-});
-</script>
+      }
+    });
+
+    $("list").addEventListener("click", async () => {
+      $("out").textContent = "Loading...";
+      try {
+        const res = await fetch("/api/files");
+        const data = await res.json();
+        $("out").textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        $("out").textContent = "Failed to load.";
+        console.error(e);
+      }
+    });
+  </script>
 </body>
 </html>
