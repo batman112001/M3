@@ -5,56 +5,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Upload</title>
 <style>
-  body { font-family: Arial; padding: 2rem; }
-  input, button { padding: 0.5rem; margin: 0.5rem 0; width: 100%; }
+  body { font-family: Arial; text-align:center; padding:50px; }
+  input { padding:10px; width:300px; margin:10px; }
+  button { padding:10px 20px; margin:10px; }
 </style>
 </head>
 <body>
-<h2>Admin Upload Page</h2>
-
-<input type="text" id="fileId" placeholder="File key (e.g., M5a)">
-<input type="text" id="fileUrl" placeholder="Direct download URL">
+<h1>Admin Upload</h1>
+<input type="text" id="file-name" placeholder="File name (M1, M2, etc)">
+<br>
+<input type="text" id="file-url" placeholder="Direct download link">
+<br>
 <button id="uploadBtn">Upload</button>
+<p id="message"></p>
 
 <script>
-const REPO_OWNER = "batman112001"; // your GitHub username
-const REPO_NAME = "M3";            // repo name
-const FILE_PATH = "files.json";    // JSON file path
+const uploadBtn = document.getElementById('uploadBtn');
+uploadBtn.addEventListener('click', async () => {
+    const name = document.getElementById('file-name').value.trim();
+    const url = document.getElementById('file-url').value.trim();
+    const msg = document.getElementById('message');
 
-document.getElementById("uploadBtn").addEventListener("click", async () => {
-  const key = document.getElementById("fileId").value.trim();
-  const url = document.getElementById("fileUrl").value.trim();
-  if(!key || !url) { alert("Enter both key and URL!"); return; }
+    if(!name || !url) { msg.textContent = "Enter both name & URL"; return; }
 
-  const TOKEN = prompt("Enter your GitHub Personal Access Token (kept private in browser)");
+    try {
+        // Load current files
+        const res = await fetch('files.json');
+        const files = await res.json();
+        files[name] = url;
 
-  // 1️⃣ Fetch existing files.json
-  const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-    headers: { Authorization: `token ${TOKEN}` }
-  });
-  if(!res.ok) { alert("Error fetching files.json"); return; }
-  const data = await res.json();
-  
-  // 2️⃣ Decode content
-  const content = JSON.parse(atob(data.content));
-  content[key] = url;
+        // Update files.json (GitHub API or Netlify server needed for write)
+        msg.textContent = `File "${name}" added! Upload the updated files.json manually to GitHub/Netlify.`;
 
-  // 3️⃣ Update via PUT
-  const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-    method: "PUT",
-    headers: { 
-      Authorization: `token ${TOKEN}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message: `Add/update ${key}`,
-      content: btoa(JSON.stringify(content, null, 2)),
-      sha: data.sha
-    })
-  });
-
-  if(putRes.ok) alert("Upload successful!");
-  else alert("Upload failed. Check token and repo permissions.");
+        console.log("Updated files.json:", files);
+    } catch (e) {
+        msg.textContent = "Error reading files.json";
+        console.error(e);
+    }
 });
 </script>
 </body>
