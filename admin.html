@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Upload Page</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Admin Upload Page</h1>
+
+  <input type="text" id="fileId" placeholder="Enter File ID (short name)">
+  <input type="text" id="fileUrl" placeholder="Paste File Link">
+  <button id="uploadBtn">Upload</button>
+
+  <pre id="output"></pre>
+
+  <script>
+    // 👉 CONFIG: set your GitHub repo details
+    const REPO_OWNER = "batman112001";
+    const REPO_NAME = "M3";   // e.g. M3
+    const FILE_PATH = "files.json";
+    const TOKEN = "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"; // ⚠️ NEVER expose this publicly!
+
+    document.getElementById("uploadBtn").addEventListener("click", async () => {
+      const id = document.getElementById("fileId").value.trim();
+      const url = document.getElementById("fileUrl").value.trim();
+
+      if (!id || !url) {
+        alert("Both fields are required!");
+        return;
+      }
+
+      try {
+        new URL(url); // validate URL
+
+        // 1. Get current files.json content
+        let res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+          headers: { Authorization: `token ${TOKEN}` }
+        });
+        let fileData = await res.json();
+
+        let content = atob(fileData.content); // decode base64
+        let json = JSON.parse(content);
+
+        // 2. Add new entry
+        json[id] = url;
+
+        // 3. Update the file
+        const updatedContent = btoa(JSON.stringify(json, null, 2)); // encode base64
+
+        await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+          method: "PUT",
+          headers: {
+            Authorization: `token ${TOKEN}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: `Added ${id}`,
+            content: updatedContent,
+            sha: fileData.sha
+          })
+        });
+
+        document.getElementById("output").textContent = 
+          `✅ Added ${id}. Users can download at:\nhttps://YOUR_NETLIFY_SITE.netlify.app/downloads.html?id=${id}`;
+
+      } catch (err) {
+        console.error(err);
+        alert("❌ Failed to update file. Check console.");
+      }
+    });
+  </script>
+</body>
+</html>
