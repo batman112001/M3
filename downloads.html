@@ -1,41 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Download Page</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Download</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
-<body>
-  <a id="downloadBtn" class="download-button">Download</a>
+<body class="center">
+  <a id="downloadBtn" class="download-button" style="display:none" target="_blank">Download</a>
+  <p id="status">Loading…</p>
 
   <script>
-    async function loadFile() {
-      const params = new URLSearchParams(window.location.search);
-      const fileId = params.get("id");
+    (async () => {
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
 
-      if (!fileId) {
-        document.body.innerHTML = "<p>No file ID provided!</p>";
+      const status = document.getElementById("status");
+      const btn = document.getElementById("downloadBtn");
+
+      if (!id) {
+        status.textContent = "No file id provided.";
         return;
       }
 
       try {
-        const res = await fetch("files.json");
+        const res = await fetch(`/api/file?id=${encodeURIComponent(id)}`);
         const data = await res.json();
 
-        if (data[fileId]) {
-          const btn = document.getElementById("downloadBtn");
-          btn.href = data[fileId];
-          btn.target = "_blank";
-        } else {
-          document.body.innerHTML = "<p>File not found!</p>";
+        if (!res.ok) {
+          status.textContent = data.error || "File not found.";
+          return;
         }
-      } catch {
-        document.body.innerHTML = "<p>Error loading file data!</p>";
-      }
-    }
 
-    loadFile();
+        btn.href = data.url;
+        btn.style.display = "inline-block";
+        status.remove();
+      } catch (e) {
+        status.textContent = "Error loading file.";
+        console.error(e);
+      }
+    })();
   </script>
 </body>
 </html>
